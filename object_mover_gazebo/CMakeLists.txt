@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   gazebo_msgs
   roscpp
   message_generation
-  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -210,8 +209,3 @@ include_directories(
 add_executable(gazebo_model_state_client src/gazebo_model_state_client.cpp)
 target_link_libraries(gazebo_model_state_client ${catkin_LIBRARIES})
 add_dependencies(gazebo_model_state_client object_mover_gazebo_generate_messages_cpp)
-
-
-add_executable(tf2_obstacle_frame_publisher src/tf2_obstacle_frame_publisher.cpp)
-target_link_libraries(tf2_obstacle_frame_publisher ${catkin_LIBRARIES})
-add_dependencies(tf2_obstacle_frame_publisher object_mover_gazebo_generate_messages_cpp)
