@@ -10,6 +10,8 @@ project(object_mover_gazebo)
 find_package(catkin REQUIRED COMPONENTS
   gazebo_msgs
   roscpp
+  message_generation
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -66,11 +68,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   gazebo_msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  gazebo_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -106,6 +108,7 @@ catkin_package(
 #  LIBRARIES object_mover_gazebo
 #  CATKIN_DEPENDS gazebo_msgs roscpp
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime
 )
 
 ###########
@@ -206,9 +209,9 @@ include_directories(
 
 add_executable(gazebo_model_state_client src/gazebo_model_state_client.cpp)
 target_link_libraries(gazebo_model_state_client ${catkin_LIBRARIES})
-add_dependencies(gazebo_model_state_client object_mover_gazebo_gencpp)
+add_dependencies(gazebo_model_state_client object_mover_gazebo_generate_messages_cpp)
 
 
 add_executable(tf2_obstacle_frame_publisher src/tf2_obstacle_frame_publisher.cpp)
 target_link_libraries(tf2_obstacle_frame_publisher ${catkin_LIBRARIES})
-add_dependencies(tf2_obstacle_frame_publisher object_mover_gazebo_gencpp)
+add_dependencies(tf2_obstacle_frame_publisher object_mover_gazebo_generate_messages_cpp)
