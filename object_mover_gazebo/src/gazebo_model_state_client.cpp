@@ -4,8 +4,10 @@
 // 3 - obj y
 // 4 - obj z
 // 5 - maximum displacement
-// 6 - speed
-// 7 - node loop rate
+// 6 - speed_x
+// 7 - speed_y
+// 8 - speed_z
+// 9 - node loop rate
 // 
 
 #include "ros/ros.h"
@@ -15,26 +17,30 @@
 #include <geometry_msgs/Point.h>
 #include <ctime>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
+#include <ctime>
+#include <stdlib.h>
 
 geometry_msgs::Point obstacle_coords;
 geometry_msgs::Point origin;
 std::string model_name;
 float frame_displacement = 0.0;
 float maximum_displacement = 0; // meters
-double speed = 0.1; // м/c
+double speed_x = 0.1; // м/c
+double speed_y = 0.1;
+double speed_z = 0.1;
 ros::ServiceClient client;
 
 std::vector<double_t> time_buffer;
 
 
-// geometry_msgs::Point frame_position_calculator(std::vector<uint32_t> time_buffer_in, double speed, double current_x, double current_y, double current_z, double maximum_displacement)
+// geometry_msgs::Point frame_position_calculator(std::vector<uint32_t> time_buffer_in, double speed_x, double current_x, double current_y, double current_z, double maximum_displacement)
 // {
 //     geometry_msgs::Point frame_position;
 
-//     frame_position.x = current_x + speed * (time_buffer.at(0) - time_buffer.at(1));
-//     frame_position.y = current_y + speed * (time_buffer.at(0) - time_buffer.at(1));
-//     frame_position.z = current_z + speed * (time_buffer.at(0) - time_buffer.at(1));
+//     frame_position.x = current_x + speed_x * (time_buffer.at(0) - time_buffer.at(1));
+//     frame_position.y = current_y + speed_x * (time_buffer.at(0) - time_buffer.at(1));
+//     frame_position.z = current_z + speed_x * (time_buffer.at(0) - time_buffer.at(1));
 //     return frame_position;
 // }
 
@@ -60,51 +66,45 @@ void _init_time_buffer(std::vector<double> &time_buffer_in)
     time_buffer_in = time_buffer;
 }
 
-void oscilate_by_x(std::vector<double_t> time_buffer_in, double &speed, double origin_x, double origin_y, double origin_z, double maximum_displacement)
+void oscilate_by_x(std::vector<double_t> time_buffer_in, double &speed_x, double origin_x, double origin_y, double origin_z, double maximum_displacement)
 {
-    if(speed >= 0)
+    if(speed_x >= 0)
     {
         if(frame_displacement < maximum_displacement)
         {
-            frame_displacement = frame_displacement + speed * (time_buffer.at(0) - time_buffer.at(1));
+            frame_displacement = frame_displacement + speed_x * (time_buffer.at(0) - time_buffer.at(1));
             obstacle_coords.x = origin_x + frame_displacement;
-            ROS_INFO_STREAM("Debug flag n5");
         }
         else
         {
-            speed = -speed;
-            frame_displacement = frame_displacement + speed * (time_buffer.at(0) - time_buffer.at(1));
+            speed_x = -speed_x;
+            frame_displacement = frame_displacement + speed_x * (time_buffer.at(0) - time_buffer.at(1));
             obstacle_coords.x = origin_x + frame_displacement;
-            ROS_INFO_STREAM("Debug flag n6");
         }
-        ROS_INFO_STREAM("Debug flag n3");
     }
-    else if (speed < 0)
+    else if (speed_x < 0)
     {
         if(frame_displacement > -maximum_displacement)
         {
-            frame_displacement = frame_displacement + speed * (time_buffer.at(0) - time_buffer.at(1));
+            frame_displacement = frame_displacement + speed_x * (time_buffer.at(0) - time_buffer.at(1));
             obstacle_coords.x = origin_x + frame_displacement;
-            ROS_INFO_STREAM("Debug flag n7");
         }
         else
         {
-            speed = -speed;
-            frame_displacement = frame_displacement + speed * (time_buffer.at(0) - time_buffer.at(1));
+            speed_x = -speed_x;
+            frame_displacement = frame_displacement + speed_x * (time_buffer.at(0) - time_buffer.at(1));
             obstacle_coords.x = origin_x + frame_displacement;
-            ROS_INFO_STREAM("Debug flag n8");
         }
-        ROS_INFO_STREAM("Debug flag n4");
     }
 
     //DEBUG rinfo
     //****************************************************************************************************
-    if(1)
+    if(0)
     {
         ROS_INFO_STREAM(std::endl << "_________________________________" << std::endl << "_________________________________" << std::endl 
         << "FUNCTION NAME: oscilate_by_x" << std::endl 
         << "VARIABLES: " << std::endl 
-        << "speed in moment -->" << speed * (time_buffer.at(0) - time_buffer.at(1)) << std::endl 
+        << "speed_x in moment -->" << speed_x * (time_buffer.at(0) - time_buffer.at(1)) << std::endl 
         << "frame_displacement -->" << frame_displacement << std::endl 
         << "Frame pose x -->" << obstacle_coords.x << std::endl 
         << "time_buffer 0 -->" << time_buffer.at(0) << std::endl 
@@ -120,13 +120,122 @@ void oscilate_by_x(std::vector<double_t> time_buffer_in, double &speed, double o
 }
 
 
+void oscilate_by_y(std::vector<double_t> time_buffer_in, double &speed_y, double origin_x, double origin_y, double origin_z, double maximum_displacement)
+{
+    if(speed_y >= 0)
+    {
+        if(frame_displacement < maximum_displacement)
+        {
+            frame_displacement = frame_displacement + speed_y * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.y = origin_y + frame_displacement;
+        }
+        else
+        {
+            speed_y = -speed_y;
+            frame_displacement = frame_displacement + speed_y * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.y = origin_y + frame_displacement;
+        }
+    }
+    else if (speed_y < 0)
+    {
+        if(frame_displacement > -maximum_displacement)
+        {
+            frame_displacement = frame_displacement + speed_y * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.y = origin_y + frame_displacement;
+        }
+        else
+        {
+            speed_y = -speed_y;
+            frame_displacement = frame_displacement + speed_y * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.y = origin_y + frame_displacement;
+        }
+    }
+
+    //DEBUG rinfo
+    //****************************************************************************************************
+    if(0)
+    {
+        ROS_INFO_STREAM(std::endl << "_________________________________" << std::endl << "_________________________________" << std::endl 
+        << "FUNCTION NAME: oscilate_by_y" << std::endl 
+        << "VARIABLES: " << std::endl 
+        << "speed_y in moment -->" << speed_y * (time_buffer.at(0) - time_buffer.at(1)) << std::endl 
+        << "frame_displacement -->" << frame_displacement << std::endl 
+        << "Frame pose y -->" << obstacle_coords.y << std::endl 
+        << "time_buffer 0 -->" << time_buffer.at(0) << std::endl 
+        << "time_buffer 1 -->" << time_buffer.at(1) << std::endl 
+        << "_________________________________" << std::endl << "_________________________________" << std::endl);
+    }
+    //****************************************************************************************************
+
+    // obstacle_coords.x = origin_x;
+    obstacle_coords.z = origin_z;
+
+    // ROS_INFO_STREAM("Debug flag n2");
+}
+
+
+void oscilate_by_z(std::vector<double_t> time_buffer_in, double &speed_z, double origin_x, double origin_y, double origin_z, double maximum_displacement)
+{
+    if(speed_z >= 0)
+    {
+        if(frame_displacement < maximum_displacement)
+        {
+            frame_displacement = frame_displacement + speed_z * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.z = origin_y + frame_displacement;
+        }
+        else
+        {
+            speed_z = -speed_z;
+            frame_displacement = frame_displacement + speed_z * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.z = origin_y + frame_displacement;
+        }
+    }
+    else if (speed_z < 0)
+    {
+        if(frame_displacement > -maximum_displacement)
+        {
+            frame_displacement = frame_displacement + speed_z * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.z = origin_y + frame_displacement;
+        }
+        else
+        {
+            speed_z = -speed_z;
+            frame_displacement = frame_displacement + speed_z * (time_buffer.at(0) - time_buffer.at(1));
+            obstacle_coords.z = origin_y + frame_displacement;
+        }
+    }
+
+    //DEBUG rinfo
+    //****************************************************************************************************
+    if(0)
+    {
+        ROS_INFO_STREAM(std::endl << "_________________________________" << std::endl << "_________________________________" << std::endl 
+        << "FUNCTION NAME: oscilate_by_y" << std::endl 
+        << "VARIABLES: " << std::endl 
+        << "speed_z in moment -->" << speed_z * (time_buffer.at(0) - time_buffer.at(1)) << std::endl 
+        << "frame_displacement -->" << frame_displacement << std::endl 
+        << "Frame pose y -->" << obstacle_coords.y << std::endl 
+        << "time_buffer 0 -->" << time_buffer.at(0) << std::endl 
+        << "time_buffer 1 -->" << time_buffer.at(1) << std::endl 
+        << "_________________________________" << std::endl << "_________________________________" << std::endl);
+    }
+    //****************************************************************************************************
+
+    // obstacle_coords.x = origin_x;
+    // obstacle_coords.z = origin_z;
+
+    // ROS_INFO_STREAM("Debug flag n2");
+}
+
+
 void logic()
 {
     _init_time_buffer(time_buffer);
     time_buffer.at(1) = time_buffer.at(0);
     time_buffer.at(0) = ros::Time::now().toSec();
 
-    oscilate_by_x(time_buffer, speed, origin.x, origin.y, origin.z, maximum_displacement);
+    oscilate_by_x(time_buffer, speed_x, origin.x, origin.y, origin.z, maximum_displacement);
+    oscilate_by_y(time_buffer, speed_x, origin.x, origin.y, origin.z, maximum_displacement);
 
     gazebo_msgs::SetModelState model_state_srv;
 
@@ -179,7 +288,7 @@ void logic()
 int main(int argc, char **argv)
 {
     srand(time(0));
-    ros::init(argc, argv, "gazebo_model_state"/* + rand()*/);
+    ros::init(argc, argv, "gazebo_model_state_node_" + std::to_string(rand()));
 
     int node_loop_rate = 0;
 
@@ -193,8 +302,10 @@ int main(int argc, char **argv)
     obstacle_coords.z = atof(argv[4]);
     origin = obstacle_coords;
     maximum_displacement = atof(argv[5]);
-    speed = atof(argv[6]);
-    node_loop_rate = atof(argv[7]);
+    speed_x = atof(argv[6]);
+    speed_y = atof(argv[7]);
+    speed_z = atof(argv[8]);
+    node_loop_rate = atof(argv[9]);
     
     // model_state_srv.request.model_state.twist.angular.x = 0; 
     // model_state_srv.request.model_state.twist.angular.y = 0;
